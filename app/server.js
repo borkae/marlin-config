@@ -20,6 +20,7 @@ var qr = require('qr-image');
 var machineId = require('node-machine-id').machineId;
 
 const store = require('./store');
+store.mods.editor && (store.mods.editor.root = () => git.root())
 
 var server = http.Server(app);
 var visitor = ua('UA-99239389-1');
@@ -153,7 +154,7 @@ app.get('/pio/:env/:port', function (req, res) {
   if (close)
     params.push('--upload-port',port)
   console.log(); //if removed - process hangs :)
-  (close && store.mods.serial ? sore.mods.serial.close(port) : Promise.resolve(true))
+  (close && store.mods.serial ? store.mods.serial.close(port) : Promise.resolve(true))
   .then(pioRoot)
   .then(file => {
     var cmd = pio.run(params, res, path.dirname(file));
@@ -223,6 +224,8 @@ app.post('/set/:file/:name/:prop/:value', function (req, res) {
 })
 
 app.use('/', require('./services'));
+
+require('./services/ot').init(server, '/ws');
 
 var serve = (http, port) =>
   new Promise((resolve, reject) => {
